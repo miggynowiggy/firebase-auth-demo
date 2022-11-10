@@ -115,16 +115,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue"
-import { useRouter } from "vue-router"
-import { useNotify } from "@/store/notify"
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useNotify } from '@/store/notify'
 import { LoginByEmailPassword, LoginByGoogle } from '@/services/auth'
 
 const router = useRouter()
 const notify = useNotify()
 
-const email = ref("")
-const password = ref("")
+const email = ref('')
+const password = ref('')
 const showPassword = ref(false)
 const loginForm = ref(false)
 const loginFormRef = ref(null)
@@ -136,8 +136,8 @@ async function emailSignIn() {
 
   if (!isValid) {
     notify.show({
-      text: "Double check your credentials",
-      type: "error",
+      text: 'Double check your credentials',
+      type: 'error',
     })
     loading.value = false
     return
@@ -157,9 +157,9 @@ async function emailSignIn() {
     }
 
     notify.show({
-      title: "Error",
+      title: 'Error',
       text: message,
-      type: "error",
+      type: 'error',
     })
   }
 
@@ -183,9 +183,9 @@ async function googleSignIn() {
     }
 
     notify.show({
-      title: "Error",
+      title: 'Error',
       text: message,
-      type: "error",
+      type: 'error',
     })
   }
   loading.value = false

@@ -1,15 +1,15 @@
-import { 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword, 
-  GoogleAuthProvider, 
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  GoogleAuthProvider,
   signInWithPopup,
   sendPasswordResetEmail,
   sendEmailVerification,
   User,
   UserCredential,
-  signOut
-} from "firebase/auth"
-import { AUTH } from "@/configs/firebase"
+  signOut,
+} from 'firebase/auth'
+import { AUTH } from '@/configs/firebase'
 
 const GoogleProvider = new GoogleAuthProvider()
 
@@ -18,32 +18,32 @@ export async function LoginByEmailPassword(email: string, password: string) {
     const user = await signInWithEmailAndPassword(AUTH, email, password)
     return user
   } catch (err) {
-    console.log("ERR IN LOGGING IN: ", err)
+    console.log('ERR IN LOGGING IN: ', err)
     throw err
   }
 }
 
 export async function LoginByGoogle() {
   try {
-    const result = await signInWithPopup(AUTH, GoogleProvider); 
-    const credentials = GoogleAuthProvider.credentialFromResult(result);
+    const result = await signInWithPopup(AUTH, GoogleProvider)
+    const credentials = GoogleAuthProvider.credentialFromResult(result)
 
     return {
       user: result.user,
-      token: credentials
+      token: credentials,
     }
   } catch (err) {
-    console.log('ERR WHILE LOGGING IN THROUGH GOOGLE: ', err);
+    console.log('ERR WHILE LOGGING IN THROUGH GOOGLE: ', err)
     throw err
   }
 }
 
 export async function RegisterByEmailPassword(email: string, password: string) {
   try {
-    const user = await createUserWithEmailAndPassword(AUTH, email, password);
-    return user;
+    const user = await createUserWithEmailAndPassword(AUTH, email, password)
+    return user
   } catch (err) {
-    console.log("ERR IN REGISTERING USER TO FIREBASE: ", err)
+    console.log('ERR IN REGISTERING USER TO FIREBASE: ', err)
     throw err
   }
 }
@@ -59,7 +59,7 @@ export async function SendEmailVerification(authUser: UserCredential) {
 
 export async function SendForgotPassword(email: string) {
   try {
-    await sendPasswordResetEmail(AUTH, email);
+    await sendPasswordResetEmail(AUTH, email)
   } catch (err) {
     console.log('ERR WHILE SENDING FORGOT PASSWORD: ', err)
     throw err

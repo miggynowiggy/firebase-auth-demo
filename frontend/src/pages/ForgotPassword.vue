@@ -92,15 +92,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue"
-import { useRouter } from "vue-router"
-import { useNotify } from "@/store/notify";
-import { SendForgotPassword } from "@/services/auth";
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useNotify } from '@/store/notify'
+import { SendForgotPassword } from '@/services/auth'
 
 const router = useRouter()
 const notify = useNotify()
 
-const email = ref("")
+const email = ref('')
 const forgotForm = ref(false)
 const forgotFormRef = ref(null)
 const loading = ref(false)
@@ -113,7 +113,7 @@ async function processForgotPassword() {
   if (!isValid) {
     notify.show({
       text: 'Double check your details',
-      type: 'error'
+      type: 'error',
     })
     loading.value = false
     return
@@ -125,11 +125,11 @@ async function processForgotPassword() {
   } catch (err) {
     notify.show({
       title: 'Error',
-      text: err?.message || "Something went wrong",
-      type: 'error'
+      text: err?.message || 'Something went wrong',
+      type: 'error',
     })
   }
-  
+
   loading.value = false
 }
 </script>

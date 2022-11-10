@@ -102,18 +102,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue"
-import { useRouter } from "vue-router"
-import { useNotify } from "@/store/notify"
-import { RegisterByEmailPassword, SendEmailVerification } from "@/services/auth";
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useNotify } from '@/store/notify'
+import { RegisterByEmailPassword, SendEmailVerification } from '@/services/auth'
 
 const router = useRouter()
 const notify = useNotify()
 
 const newUser = ref({
-  email: "",
-  password: "",
-  fullName: "",
+  email: '',
+  password: '',
+  fullName: '',
 })
 const showPassword = ref(false)
 const registerForm = ref(false)
@@ -126,26 +126,29 @@ async function register() {
 
   if (!isValid) {
     notify.show({
-      text: "Double check your credentials",
-      type: "error",
+      text: 'Double check your credentials',
+      type: 'error',
     })
     loading.value = false
     return
   }
 
   try {
-    const user = await RegisterByEmailPassword(newUser.value.email, newUser.value.password)
+    const user = await RegisterByEmailPassword(
+      newUser.value.email,
+      newUser.value.password
+    )
     await SendEmailVerification(user)
     notify.show({
       title: 'Registration Success!',
       text: 'Please check your email for verification steps',
-      type: 'success'
+      type: 'success',
     })
   } catch (err) {
     notify.show({
       title: 'Error',
-      text: err?.message || "Something went wrong while registering",
-      type: 'error'
+      text: err?.message || 'Something went wrong while registering',
+      type: 'error',
     })
   }
 

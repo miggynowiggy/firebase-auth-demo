@@ -7,15 +7,13 @@
     elevation="24"
     location="top end"
   >
-    <div class="text-subtitle-1 font-weight-bold text-white">{{ notify.title }}</div>
+    <div class="text-subtitle-1 font-weight-bold text-white">
+      {{ notify.title }}
+    </div>
     <div class="text-body-1">{{ notify.text }}</div>
 
     <template v-slot:action>
-      <v-btn
-        color="white"
-        variant="text"
-        @click="notify.toggleNotif"
-      >
+      <v-btn color="white" variant="text" @click="notify.toggleNotif">
         {{ notify.actionButtonText }}
       </v-btn>
     </template>
@@ -23,6 +21,6 @@
 </template>
 
 <script setup lang="ts">
-import { useNotify } from '@/store/notify';
+import { useNotify } from '@/store/notify'
 const notify = useNotify()
 </script>

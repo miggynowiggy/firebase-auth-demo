@@ -1,9 +1,9 @@
-import { defineStore } from "pinia";
+import { defineStore } from 'pinia'
 import { User as FirebaseUser } from 'firebase/auth'
 
 export interface IUser {
-  fullName: string;
-  email: string;
+  fullName: string
+  email: string
 }
 
 interface UserStore {
@@ -14,21 +14,21 @@ interface UserStore {
 export const useUser = defineStore('user', {
   state: (): UserStore => ({
     user: null,
-    authUser: null
+    authUser: null,
   }),
   getters: {
     isLoggedIn: (state) => !!state.authUser,
   },
   actions: {
     setAuthUser(user: FirebaseUser | null) {
-      this.authUser = user;
+      this.authUser = user
     },
     setUser(user: IUser | null) {
-      this.user = user;
+      this.user = user
     },
     clearStore() {
-      this.authUser = null;
-      this.user = null;
-    }
-  }
+      this.authUser = null
+      this.user = null
+    },
+  },
 })
