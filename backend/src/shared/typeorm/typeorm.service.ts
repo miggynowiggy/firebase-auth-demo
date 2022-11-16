@@ -21,7 +21,9 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
       logger: 'advanced-console',
       synchronize:
         this.config.get<string>('NODE_ENV') === 'development' ? true : false, // never use TRUE in production!
-      ssl: true,
+      ssl: {
+        rejectUnauthorized: false,
+      },
     };
   }
 }
