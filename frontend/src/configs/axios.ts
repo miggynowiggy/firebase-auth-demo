@@ -1,4 +1,4 @@
-import { Logout } from '@/services'
+import { Logout } from 'src/services'
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios'
 import { AUTH } from './firebase'
 import constants from './constants'
@@ -13,7 +13,7 @@ const requestInterceptor = async (config: AxiosRequestConfig) => {
     ? 'multipart/form-data'
     : 'application/json'
 
-  const token = await AUTH.currentUser?.getIdToken() || ''
+  const token = (await AUTH.currentUser?.getIdToken()) || ''
 
   if (token) config.headers!.authorization = `Bearer ${token}`
   return config
@@ -34,12 +34,12 @@ const errorResponseCallback: Record<number, any> = {
   401: handleHTTP401,
   403: handleHTTP403,
   500: handleHTTP500,
-  502: handleHTTP502
+  502: handleHTTP502,
 }
 
 const errorInterceptor = (error: AxiosError) => {
-  const message = error.response;
-  const statusCode = error.response?.status ?? 0;
+  const message = error.response
+  const statusCode = error.response?.status ?? 0
 
   if (errorResponseCallback[statusCode]) errorResponseCallback[statusCode]()
 

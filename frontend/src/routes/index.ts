@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
 import routes from './routes'
-import { useUserStore } from '@/store/user'
+import { useUserStore } from 'src/store/user'
 
 const router = createRouter({
   history: createWebHistory(),

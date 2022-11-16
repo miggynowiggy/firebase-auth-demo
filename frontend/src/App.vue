@@ -16,7 +16,7 @@ const router = useRouter()
 const firebaseAuthSubscriber = ref<Unsubscribe | null>(null)
 
 onMounted(() => {
-  // Subscribe to firebase changes when the app is initialized
+  // Subscribe to firebase auth changes when the app is initialized
   const subscriber = onAuthStateChanged(AUTH, async (authUser) => {
     userStore.setAuthUser(authUser)
 
@@ -25,22 +25,22 @@ onMounted(() => {
       router.push({ name: 'Login' })
       notification['error']({
         message: 'Email not verified!',
-        description: 'Please confirm your email first before logging in'
+        description: 'Please confirm your email first before logging in',
       })
       return
     }
 
     if (authUser) {
       // Check if user is saved at the backend
-      let user = await CheckUserByEmail(authUser.email as string);
+      let user = await CheckUserByEmail(authUser.email as string)
 
       // If the firebase user was not yet created at the backend, then create it
       if (!user) {
         user = await CreateUser({
           uid: authUser?.uid as string,
           email: authUser?.email as string,
-          fullName: authUser?.displayName ?? "",
-          profilePicture: authUser?.photoURL ?? "",
+          fullName: authUser?.displayName ?? '',
+          profilePicture: authUser?.photoURL ?? '',
         })
       }
 

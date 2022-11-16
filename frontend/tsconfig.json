@@ -13,10 +13,10 @@
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "lib": ["esnext", "dom"],
-    "types": ["vuetify"],
     "paths": {
-      "@/*": ["src/*"]
+      "src/*": ["src/*"]
     },
+    "types": ["vite/client"]
   },
   "include": [
     "src/**/*.ts",

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { User as FirebaseUser } from 'firebase/auth'
-import { IUser } from '@/models'
+import { IUser } from 'src/models'
 
 interface UserStore {
   user: IUser | null

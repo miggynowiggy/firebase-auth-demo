@@ -13,7 +13,7 @@ export default defineConfig({
   define: { 'process.env': {} },
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
+      'src': fileURLToPath(new URL('./src', import.meta.url))
     },
     extensions: [
       '.js',

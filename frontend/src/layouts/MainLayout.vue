@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { useUserStore } from '@/store';
-import { Logout } from '@/services';
-import { ChangePassword } from '../services';
-import { notification } from 'ant-design-vue';
+import { ref, computed } from 'vue'
+import { notification } from 'ant-design-vue'
+import { useUserStore } from 'src/store'
+import { Logout, ChangePassword } from 'src/services'
+
 
 const userStore = useUserStore()
 const logoutLoading = ref(false)
@@ -12,10 +12,12 @@ const passwordModal = ref(false)
 const loading = ref(false)
 const changePasswordForm = ref({
   oldPassword: '',
-  newPassword: ''
+  newPassword: '',
 })
 
-const isEmailSignIn = computed(() => userStore.authUser?.providerData[0].providerId === 'password')
+const isEmailSignIn = computed(
+  () => userStore.authUser?.providerData[0].providerId === 'password'
+)
 
 async function logout() {
   logoutLoading.value = true
@@ -32,14 +34,17 @@ function openChangePass() {
 async function confirmChangePassword() {
   loading.value = true
   try {
-    await ChangePassword(changePasswordForm.value.oldPassword, changePasswordForm.value.newPassword)
+    await ChangePassword(
+      changePasswordForm.value.oldPassword,
+      changePasswordForm.value.newPassword
+    )
     passwordModal.value = false
     notification['success']({
-      message: "Change password success!",
-      description: "Your password has been changed!"
+      message: 'Change password success!',
+      description: 'Your password has been changed!',
     })
-  } catch (err) {
-    let message = ""
+  } catch (err: any) {
+    let message = ''
     switch (err?.code) {
       case 'auth/wrong-password':
         message = 'Current password does not match'
@@ -50,25 +55,37 @@ async function confirmChangePassword() {
 
     notification['error']({
       message: 'Error while changing password',
-      description: message
+      description: message,
     })
   }
   loading.value = false
 }
 </script>
 
-
 <template>
   <a-layout>
     <a-layout-header
       :style="{ position: 'fixed', zIndex: 1, width: '100%', height: '70px' }"
     >
-      <a-row type="flex" align="top" justify="between" :style="{ height: '100%', padding: '10px' }">
+      <a-row
+        type="flex"
+        align="top"
+        justify="between"
+        :style="{ height: '100%', padding: '10px' }"
+      >
         <a-col :flex="22">
-          <a-typography-title :style="{ color: 'white' }">My Expenses Tracker</a-typography-title>
+          <a-typography-title :style="{ color: 'white' }"
+            >My Expenses Tracker</a-typography-title
+          >
         </a-col>
         <a-col flex="auto">
-          <a-button type="text" :style="{ color: 'white' }" size="large" @click="profileModal = true">Profile</a-button>
+          <a-button
+            type="text"
+            :style="{ color: 'white' }"
+            size="large"
+            @click="profileModal = true"
+            >Profile</a-button
+          >
         </a-col>
         <a-col flex="auto">
           <a-button type="dashed" size="large" @click="logout">Logout</a-button>
@@ -76,30 +93,43 @@ async function confirmChangePassword() {
       </a-row>
     </a-layout-header>
 
-    <a-layout-content :style="{ padding: '0 70px', marginTop: '70px', height: '100vh' }">
+    <a-layout-content
+      :style="{ padding: '0 70px', marginTop: '70px', height: '100vh' }"
+    >
       <router-view />
 
       <!-- Profile Modal -->
-      <a-modal 
+      <a-modal
         v-model:visible="profileModal"
         @ok="profileModal = false"
         title="Profile"
       >
-        <a-row type="flex" align="middle" justify="center" :style="{ textAlign: 'center' }">
+        <a-row
+          type="flex"
+          align="middle"
+          justify="center"
+          :style="{ textAlign: 'center' }"
+        >
           <a-col :span="22">
-            <a-img
-              :height="250"
-              :src="userStore.user?.profilePicture"
-            />
+            <a-img :height="250" :src="userStore.user?.profilePicture" />
           </a-col>
           <a-col :span="22">
-            <a-typography-title>{{ userStore.user?.fullName || "" }}</a-typography-title>
+            <a-typography-title>{{
+              userStore.user?.fullName || ''
+            }}</a-typography-title>
           </a-col>
           <a-col :span="22">
-            <a-typography-paragraph>{{ userStore.user?.email || "" }}</a-typography-paragraph>
+            <a-typography-paragraph>{{
+              userStore.user?.email || ''
+            }}</a-typography-paragraph>
           </a-col>
           <a-col :span="22" v-if="isEmailSignIn">
-            <a-button type="default" :style="{ marginTop: '20px'}" @click="openChangePass">Change Password</a-button>
+            <a-button
+              type="default"
+              :style="{ marginTop: '20px' }"
+              @click="openChangePass"
+              >Change Password</a-button
+            >
           </a-col>
         </a-row>
       </a-modal>
@@ -109,9 +139,10 @@ async function confirmChangePassword() {
         v-model:visible="passwordModal"
         title="Change Password"
         @ok="confirmChangePassword"
-        :ok-button-props="{ 
+        :ok-button-props="{
           loading,
-          disabled: !changePasswordForm.oldPassword || !changePasswordForm.newPassword
+          disabled:
+            !changePasswordForm.oldPassword || !changePasswordForm.newPassword,
         }"
       >
         <a-row type="flex" align="middle" justify="center">

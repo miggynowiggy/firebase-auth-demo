@@ -3,7 +3,7 @@ import { RouteRecordRaw } from 'vue-router'
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    component: () => import('@/layouts/MainLayout.vue'),
+    component: () => import('src/layouts/MainLayout.vue'),
     children: [
       {
         path: '',
@@ -11,28 +11,28 @@ const routes: RouteRecordRaw[] = [
         meta: {
           isPrivateRoute: true,
         },
-        component: () => import('@/pages/Home.vue'),
+        component: () => import('src/pages/Home.vue'),
       },
     ],
   },
   {
     path: '',
-    component: () => import('@/layouts/BlankLayout.vue'),
+    component: () => import('src/layouts/BlankLayout.vue'),
     children: [
       {
         path: '/login',
         name: 'Login',
-        component: () => import('@/pages/Login.vue'),
+        component: () => import('src/pages/Login.vue'),
       },
       {
         path: '/register',
         name: 'Register',
-        component: () => import('@/pages/Register.vue'),
+        component: () => import('src/pages/Register.vue'),
       },
       {
         path: '/forgot-password',
         name: 'ForgotPassword',
-        component: () => import('@/pages/ForgotPassword.vue'),
+        component: () => import('src/pages/ForgotPassword.vue'),
       },
     ],
   },

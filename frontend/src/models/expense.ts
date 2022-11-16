@@ -1,8 +1,23 @@
 import { IUser } from './user'
 
-export const ExpenseTypes = ['Bills', 'Food', 'Grocery', 'Transportation', 'Payment', 'Fund Transfer', 'Emergency']
+export const ExpenseTypes = [
+  'Bills',
+  'Food',
+  'Grocery',
+  'Transportation',
+  'Payment',
+  'Fund Transfer',
+  'Emergency',
+]
 
-export type TExpenseType = 'Bills' | 'Food' | 'Grocery' | 'Transportation' | 'Payment' | 'Fund Transfer' | 'Emergency'
+export type TExpenseType =
+  | 'Bills'
+  | 'Food'
+  | 'Grocery'
+  | 'Transportation'
+  | 'Payment'
+  | 'Fund Transfer'
+  | 'Emergency'
 
 export interface IExpense {
   id: number
@@ -23,7 +38,7 @@ export interface ICreateExpense {
 }
 
 export interface IUpdateExpense {
-  id: number;
+  id: number
   description?: String
   amount?: number
   date?: Date | string

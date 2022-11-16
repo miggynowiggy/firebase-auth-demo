@@ -1,19 +1,32 @@
 <script setup lang="ts">
 import { ref, defineComponent, reactive, computed, onMounted, watch } from 'vue'
 import type { Ref, UnwrapRef } from 'vue'
-import { PlusCircleOutlined, EditOutlined, CheckOutlined } from '@ant-design/icons-vue'
+import {
+  PlusCircleOutlined,
+  EditOutlined,
+  CheckOutlined,
+} from '@ant-design/icons-vue'
 import { message, notification } from 'ant-design-vue'
 import cloneDeep from 'lodash/cloneDeep'
 import dayjs from 'dayjs'
 import type { Dayjs } from 'dayjs'
-import { IExpense, ICreateExpense, ExpenseTypes, TExpenseType } from '@/models'
-import { CreateExpense } from '@/services'
-import { DeleteExpense, GetExpenses, UpdateExpense } from '@/services'
+import {
+  IExpense,
+  ICreateExpense,
+  ExpenseTypes,
+  TExpenseType,
+} from 'src/models'
+import {
+  CreateExpense,
+  DeleteExpense,
+  GetExpenses,
+  UpdateExpense,
+} from 'src/services'
 
 type TCustomExpense = {
-  description: string,
-  type: TExpenseType,
-  amount: number,
+  description: string
+  type: TExpenseType
+  amount: number
   date: Dayjs
 }
 const DATE_FORMAT = 'YYYY-MM-DD'
@@ -25,7 +38,7 @@ const expenseDate = ref<Dayjs>()
 const expense = ref<ICreateExpense>({
   description: '',
   amount: 0.0,
-  type: 'Bills'
+  type: 'Bills',
 })
 const expenses = ref<IExpense[]>([])
 const expensesHeader = ref([
@@ -33,12 +46,17 @@ const expensesHeader = ref([
   { title: 'Description', dataIndex: 'description', key: 'description' },
   { title: 'Type', dataIndex: 'type', key: 'type' },
   { title: 'Amount', dataIndex: 'amount', key: 'amount' },
-  { title: '', dataIndex: 'operations' }
+  { title: '', dataIndex: 'operations' },
 ])
 const editableData: UnwrapRef<Record<string, TCustomExpense>> = reactive({})
 
-const validForm = computed(() => !expense.value.amount && !expense.value.description && !expense.value.type)
-const totalExpenses = computed(() => expenses.value.reduce((sum, ex) => sum += ex.amount, 0))
+const validForm = computed(
+  () =>
+    !expense.value.amount && !expense.value.description && !expense.value.type
+)
+const totalExpenses = computed(() =>
+  expenses.value.reduce((sum, ex) => (sum += ex.amount), 0)
+)
 
 // Get all User's Expenses on page mount
 onMounted(async () => {
@@ -46,10 +64,10 @@ onMounted(async () => {
   const externalExpenses = await GetExpenses()
   if (externalExpenses && externalExpenses.length) {
     expenses.value = externalExpenses.map((ex) => {
-      const formattedDate = dayjs(ex.date).format(DATE_FORMAT);
+      const formattedDate = dayjs(ex.date).format(DATE_FORMAT)
       return {
         ...ex,
-        date: formattedDate
+        date: formattedDate,
       }
     })
   }
@@ -61,15 +79,15 @@ async function addExpense() {
   expense.value.amount = Number(expense.value.amount)
 
   if (expenseDate.value) {
-    expense.value.date = expenseDate.value.toISOString();
+    expense.value.date = expenseDate.value.toISOString()
   }
-  
+
   const newExpense = await CreateExpense(expense.value)
 
   if (!newExpense) {
     notification['error']({
       message: 'Error!',
-      description: 'Something went wrong while adding expense'
+      description: 'Something went wrong while adding expense',
     })
     loading.value = false
     return
@@ -77,7 +95,7 @@ async function addExpense() {
 
   expenses.value.push({
     ...newExpense,
-    date: dayjs(newExpense.date as string).format(DATE_FORMAT)
+    date: dayjs(newExpense.date as string).format(DATE_FORMAT),
   } as IExpense)
 
   dialogState.value = false
@@ -86,23 +104,23 @@ async function addExpense() {
 }
 
 const edit = (id: number) => {
-  const row = cloneDeep(expenses.value.filter(item => id === item.id)[0])
+  const row = cloneDeep(expenses.value.filter((item) => id === item.id)[0])
   editableData[id] = cloneDeep({ ...row, date: dayjs(row.date) })
 }
 
 const save = async (id: number) => {
   const updatedRow = Object.assign(
-    expenses.value.filter(item => id === item.id)[0], 
-    editableData[id], 
+    expenses.value.filter((item) => id === item.id)[0],
+    editableData[id],
     { date: editableData[id].date.toISOString() }
   )
-  
+
   const updatedExpense = await UpdateExpense({
     id: updatedRow.id,
     description: updatedRow.description,
     type: updatedRow.type,
     date: updatedRow.date,
-    amount: updatedRow.amount
+    amount: updatedRow.amount,
   })
 
   if (!updatedExpense) {
@@ -110,11 +128,11 @@ const save = async (id: number) => {
     delete editableData[id]
   }
 
-  const index = expenses.value.findIndex(e => e.id === updatedExpense?.id);
+  const index = expenses.value.findIndex((e) => e.id === updatedExpense?.id)
   if (index >= 0) {
     expenses.value.splice(index, 1, {
       ...updatedExpense,
-      date: dayjs(updatedExpense?.date as string).format(DATE_FORMAT)
+      date: dayjs(updatedExpense?.date as string).format(DATE_FORMAT),
     } as IExpense)
   }
 
@@ -123,33 +141,40 @@ const save = async (id: number) => {
 }
 
 const onDelete = async (id: number) => {
-  loading.value = true;
-  
-  const isDeleted = await DeleteExpense(id);
+  loading.value = true
+
+  const isDeleted = await DeleteExpense(id)
   if (!isDeleted) {
     message['error']({ content: 'Expense not deleted!' })
     return
   }
 
   message['success']({ content: 'Expenses deleted!' })
-  loading.value = false;
-  expenses.value = expenses.value.filter(item => item.id !== id)
+  loading.value = false
+  expenses.value = expenses.value.filter((item) => item.id !== id)
 }
-
 </script>
 
 <template>
   <div>
     <!-- Expense Table -->
-    <a-row type="flex" align="middle" justify="center" :style="{ height: '100%' }">
-      <a-col :span="4" :style="{ margin: '20px'}">
+    <a-row
+      type="flex"
+      align="middle"
+      justify="center"
+      :style="{ height: '100%' }"
+    >
+      <a-col :span="4" :style="{ margin: '20px' }">
         <a-card>
-          <a-statistic :title="`Total Expenses as of ${dayjs().format('MMM DD, YYYY')}`" :value="totalExpenses" />
+          <a-statistic
+            :title="`Total Expenses as of ${dayjs().format('MMM DD, YYYY')}`"
+            :value="totalExpenses"
+          />
         </a-card>
       </a-col>
       <a-col :span="22" :style="{ margin: '20px' }">
-        <a-table 
-          :dataSource="expenses" 
+        <a-table
+          :dataSource="expenses"
           :columns="expensesHeader"
           :loading="loading"
         >
@@ -163,12 +188,15 @@ const onDelete = async (id: number) => {
                     :style="{ width: '100%' }"
                   >
                     <template #addonAfter>
-                      <CheckOutlined class="editable-cell-icon-check" @click="save(record.id)" />
+                      <CheckOutlined
+                        class="editable-cell-icon-check"
+                        @click="save(record.id)"
+                      />
                     </template>
                   </a-date-picker>
                 </div>
                 <div v-else class="editable-cell-text-wrapper">
-                  {{ text || ' '}}
+                  {{ text || ' ' }}
                 </div>
               </div>
             </template>
@@ -182,12 +210,15 @@ const onDelete = async (id: number) => {
                     @blur="save(record.id)"
                   >
                     <template #addonAfter>
-                      <CheckOutlined class="editable-cell-icon-check" @click="save(record.id)" />
+                      <CheckOutlined
+                        class="editable-cell-icon-check"
+                        @click="save(record.id)"
+                      />
                     </template>
                   </a-input>
                 </div>
                 <div v-else class="editable-cell-text-wrapper">
-                  {{ text || ' '}}
+                  {{ text || ' ' }}
                 </div>
               </div>
             </template>
@@ -197,18 +228,21 @@ const onDelete = async (id: number) => {
                 <div v-if="editableData[record.id]">
                   <a-select
                     v-model:value="editableData[record.id].type"
-                    :options="ExpenseTypes.map(e => ({ label: e, value: e }))"
+                    :options="ExpenseTypes.map((e) => ({ label: e, value: e }))"
                     @keypress.enter="save(record.id)"
                     @select="save(record.id)"
                     :style="{ width: '100%' }"
                   >
                     <template #addonAdter>
-                      <CheckOutlined class="editable-cell-icon-check" @click="save(record.id)" />
+                      <CheckOutlined
+                        class="editable-cell-icon-check"
+                        @click="save(record.id)"
+                      />
                     </template>
                   </a-select>
                 </div>
                 <div v-else class="editable-cell-text-wrapper">
-                  {{ text || ' '}}
+                  {{ text || ' ' }}
                 </div>
               </div>
             </template>
@@ -222,12 +256,15 @@ const onDelete = async (id: number) => {
                     @keypress.enter="save(record.id)"
                   >
                     <template #addonAfter>
-                      <CheckOutlined class="editable-cell-icon-check" @click="save(record.id)" />
+                      <CheckOutlined
+                        class="editable-cell-icon-check"
+                        @click="save(record.id)"
+                      />
                     </template>
                   </a-input-number>
                 </div>
                 <div v-else class="editable-cell-text-wrapper">
-                  {{ text || ' '}}
+                  {{ text || ' ' }}
                 </div>
               </div>
             </template>
@@ -241,30 +278,37 @@ const onDelete = async (id: number) => {
                 <a-button size="small" type="text" danger>Delete</a-button>
               </a-popconfirm>
 
-              <a-button 
-                size="small" 
-                @click="edit(record.id)" 
+              <a-button
+                size="small"
+                @click="edit(record.id)"
                 :style="{ marginLeft: '10px' }"
-                v-if="!editableData[record.id] || !Object.keys(editableData[record.id]).length"
+                v-if="
+                  !editableData[record.id] ||
+                  !Object.keys(editableData[record.id]).length
+                "
               >
                 Edit
               </a-button>
 
-              <a-button 
-                size="small" 
-                @click="delete editableData[record.id]" 
+              <a-button
+                size="small"
+                @click="delete editableData[record.id]"
                 :style="{ marginLeft: '10px' }"
                 v-else
               >
                 Cancel
               </a-button>
 
-              <a-button 
-                size="small" 
+              <a-button
+                size="small"
                 type="primary"
-                @click="save(record.id)" 
+                @click="save(record.id)"
                 :style="{ marginLeft: '10px' }"
-                v-show="editableData && editableData[record.id] && Object.keys(editableData[record.id]).length"
+                v-show="
+                  editableData &&
+                  editableData[record.id] &&
+                  Object.keys(editableData[record.id]).length
+                "
               >
                 Save
               </a-button>
@@ -278,18 +322,18 @@ const onDelete = async (id: number) => {
     <a-modal
       v-model:visible="dialogState"
       title="Add Expense"
-      :ok-button-props="{ 
+      :ok-button-props="{
         disabled: validForm,
-        loading
+        loading,
       }"
       :cancel-button-props="{
-        disabled: loading
+        disabled: loading,
       }"
       @ok="addExpense"
     >
       <a-form layout="vertical">
         <a-form-item label="Description" name="description">
-          <a-textarea 
+          <a-textarea
             v-model:value="expense.description"
             placeholder="describe your expense..."
             auto-size
@@ -300,14 +344,14 @@ const onDelete = async (id: number) => {
           <a-date-picker
             v-model:value="expenseDate"
             allowClear
-            :style="{ width: '100%'}"
+            :style="{ width: '100%' }"
           />
         </a-form-item>
 
         <a-form-item label="Expense Type" name="expenseType">
           <a-select
             v-model:value="expense.type"
-            :options="ExpenseTypes.map(e => ({ label: e, value: e}))"
+            :options="ExpenseTypes.map((e) => ({ label: e, value: e }))"
             placeholder=""
           />
         </a-form-item>
@@ -321,7 +365,7 @@ const onDelete = async (id: number) => {
         </a-form-item>
       </a-form>
     </a-modal>
-    <a-button 
+    <a-button
       type="primary"
       size="large"
       shape="circle"
@@ -329,9 +373,8 @@ const onDelete = async (id: number) => {
       @click="dialogState = true"
     >
       <template #icon>
-        <PlusCircleOutlined/>
+        <PlusCircleOutlined />
       </template>
     </a-button>
   </div>
 </template>
-
