@@ -4,16 +4,17 @@ import {
   ForgotPasswordForm,
   VerifyEmailForm,
 } from './dto';
-import Firebase from 'src/configs/firebase';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/user/user.entity';
 import { Repository } from 'typeorm';
+import { FirebaseService } from 'src/firebase/firebase.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly Users: Repository<User>,
+    private readonly firebase: FirebaseService,
   ) {}
 
   async getUserByEmail(email: string) {
@@ -65,7 +66,7 @@ export class AuthService {
         throw new HttpException('user not found', HttpStatus.NOT_FOUND);
       }
 
-      await Firebase.auth().updateUser(existingUser.uid, {
+      await this.firebase.auth.updateUser(existingUser.uid, {
         password,
       });
 
@@ -113,7 +114,7 @@ export class AuthService {
         throw new HttpException('user not found', HttpStatus.NOT_FOUND);
       }
 
-      await Firebase.auth().updateUser(existingUser.uid, {
+      await this.firebase.auth.updateUser(existingUser.uid, {
         emailVerified: true,
       });
 
