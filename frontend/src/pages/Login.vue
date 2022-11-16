@@ -87,13 +87,13 @@ async function googleSignIn() {
     type="flex"
     align="middle"
     justify="center"
-    :style="{ height: '100%' }"
+    :style="{ height: '100%', width: '100%' }"
   >
-    <a-col :span="6">
-      <a-card title="Login" hoverable>
+    <a-col :xs="22" :sm="22" :md="7">
+      <a-card title="Login" hoverable bordered>
         <a-form layout="vertical">
           <a-form-item label="Email" name="email">
-            <a-input v-model:value="email">
+            <a-input v-model:value="email" type="email">
               <template #prefix>
                 <UserOutlined class="site-form-item-icon" />
               </template>

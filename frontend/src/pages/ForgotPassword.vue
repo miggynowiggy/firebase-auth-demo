@@ -41,7 +41,7 @@ async function processForgotPassword() {
     justify="center"
     :style="{ height: '100%' }"
   >
-    <a-col :span="12" v-if="sendSuccess">
+    <a-col :xs="22" :sm="22" :md="7" v-if="sendSuccess">
       <div v-if="sendSuccess" :style="{ textAlign: 'center' }">
         <a-typography-title> Success! </a-typography-title>
         <a-typography>
@@ -56,7 +56,7 @@ async function processForgotPassword() {
         </a-button>
       </div>
     </a-col>
-    <a-col :span="6" v-else>
+    <a-col :xs="22" :sm="22" :md="7" v-else>
       <a-card title="Forgot Password">
         <a-form layout="vertical">
           <a-form-item label="Email" name="email">

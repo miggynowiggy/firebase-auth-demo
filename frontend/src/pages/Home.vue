@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, defineComponent, reactive, computed, onMounted, watch } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import type { Ref, UnwrapRef } from 'vue'
 import {
   PlusCircleOutlined,
@@ -7,6 +7,7 @@ import {
   CheckOutlined,
 } from '@ant-design/icons-vue'
 import { message, notification } from 'ant-design-vue'
+import type { TableColumnType, TableProps } from 'ant-design-vue'
 import cloneDeep from 'lodash/cloneDeep'
 import dayjs from 'dayjs'
 import type { Dayjs } from 'dayjs'
@@ -42,16 +43,70 @@ const expense = ref<ICreateExpense>({
   amount: 0.0,
   type: 'Bills',
 })
+const tableSort = ref<any>({})
+const tableFilter = ref<any>({})
 const expenses = ref<IExpense[]>([])
-const expensesHeader = ref([
-  { title: 'Date', dataIndex: 'date', key: 'date' },
-  { title: 'Description', dataIndex: 'description', key: 'description' },
-  { title: 'Type', dataIndex: 'type', key: 'type' },
-  { title: 'Amount', dataIndex: 'amount', key: 'amount' },
-  { title: '', dataIndex: 'operations' },
-])
 const editableData: UnwrapRef<Record<string, TCustomExpense>> = reactive({})
 
+const uniqueTypeList = ExpenseTypes.map(e => ({ text: e, value: e }))
+const uniqueDateList = computed(() => [...new Set(expenses.value.map((ex) => ex.date))].map((ex) => ({
+  text: ex,
+  value: ex,
+})))
+
+const expensesHeader = computed(() => [
+  {
+    title: 'Date',
+    dataIndex: 'date',
+    key: 'date',
+    filters: uniqueDateList.value,
+    filterMultiple: true,
+    filteredValue: tableFilter.value?.date || null,
+    onFilter: (value: string, ex: IExpense) => value === ex.date.toString(),
+    sorter: {
+      compare: (a: IExpense, b: IExpense) =>
+        Number(dayjs(a.date).format('x')) - Number(dayjs(b.date).format('x')),
+      multiple: 1,
+    },
+    sortOrder: tableSort.value?.columnKey === 'date' && tableSort.value?.order,
+    fixed: 'left',
+    ellipsis: true,
+  },
+  {
+    title: 'Description',
+    dataIndex: 'description',
+    key: 'description',
+  },
+  {
+    title: 'Type',
+    dataIndex: 'type',
+    key: 'type',
+    filters: uniqueTypeList,
+    filteredValue: tableFilter.value?.type || null,
+    filterMultiple: true,
+    onFilter: (value: string, ex: IExpense) => value === ex.type,
+    sorter: {
+      compare: (a: IExpense, b: IExpense) => a.type > b.type,
+      multiple: 2
+    },
+    sortOrder: tableSort.value?.columnKey === 'type' && tableSort.value?.order,
+  },
+  {
+    title: 'Amount',
+    dataIndex: 'amount',
+    key: 'amount',
+    sorter: {
+      compare: (a: IExpense, b: IExpense) => Number(a.amount) - Number(b.amount),
+      multiple: 3
+    },
+    sortOrder: tableSort.value?.columnKey === 'amount' && tableSort.value?.order,
+  },
+  {
+    title: '',
+    dataIndex: 'operations',
+    fixed: 'right'
+  },
+])
 const validForm = computed(
   () =>
     !expense.value.amount && !expense.value.description && !expense.value.type
@@ -76,7 +131,16 @@ onMounted(async () => {
   loading.value = false
 })
 
-async function addExpense() {
+const handleTableChange: TableProps['onChange'] = (
+  pagination,
+  filters,
+  sorter
+) => {
+  tableSort.value = sorter
+  tableFilter.value = filters
+}
+
+const addExpense = async () => {
   loading.value = true
   expense.value.amount = Number(expense.value.amount)
 
@@ -102,7 +166,7 @@ async function addExpense() {
 
   dialogState.value = false
   loading.value = false
-  expense.value = { description: '' , amount: 0, type: 'Bills'  }
+  expense.value = { description: '', amount: 0, type: 'Bills' }
   message['success']({ content: 'Expense added!' })
   logEvent(ANALYTICS, 'add_expense')
 }
@@ -170,19 +234,23 @@ const onDelete = async (id: number) => {
       justify="center"
       :style="{ height: '100%' }"
     >
-      <a-col :span="4" :style="{ margin: '20px' }">
+      <a-col :xs="23" :sm="22" :md="5" :style="{ margin: '20px' }">
         <a-card>
           <a-statistic
             :title="`Total Expenses as of ${dayjs().format('MMM DD, YYYY')}`"
             :value="totalExpenses"
+            prefix="₱"
           />
         </a-card>
       </a-col>
-      <a-col :span="22" :style="{ margin: '20px' }">
+      <a-col :span="24" :style="{ margin: '20px', width: '100%' }">
         <a-table
           :dataSource="expenses"
           :columns="expensesHeader"
           :loading="loading"
+          :style="{ width: '100%' }"
+          resizeable
+          @change="handleTableChange"
         >
           <template #bodyCell="{ column, text, record }">
             <template v-if="column.dataIndex === 'date'">

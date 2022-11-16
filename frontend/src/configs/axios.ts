@@ -13,11 +13,12 @@ const requestInterceptor = async (config: AxiosRequestConfig) => {
     ? 'multipart/form-data'
     : 'application/json'
 
-  const token = (await AUTH.currentUser?.getIdToken()) || ''
+  const token = await AUTH.currentUser?.getIdToken()
 
   if (token) config.headers!.authorization = `Bearer ${token}`
   return config
 }
+
 const responseInterceptor = (response: AxiosResponse) => response.data
 
 const handleHTTP400 = () => {}

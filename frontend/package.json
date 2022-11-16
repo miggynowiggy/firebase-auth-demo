@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "vite",
+    "dev:live": "vite --host",
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
     "start": "npx http-server --p ${PORT} ./dist",

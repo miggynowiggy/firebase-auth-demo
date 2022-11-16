@@ -61,11 +61,11 @@ async function register() {
     justify="center"
     :style="{ height: '100%' }"
   >
-    <a-col :span="6">
+    <a-col :xs="22" :sm="22" :md="7">
       <a-card title="Register" hoverable>
         <a-form layout="vertical">
           <a-form-item label="Full Name" name="fullName">
-            <a-input v-model:value="newUser.fullName">
+            <a-input v-model:value="newUser.fullName" type="text">
               <template #prefix>
                 <UserOutlined class="site-form-item-icon" />
               </template>
@@ -73,7 +73,7 @@ async function register() {
           </a-form-item>
 
           <a-form-item label="Email" name="email">
-            <a-input v-model:value="newUser.email">
+            <a-input v-model:value="newUser.email" type="email">
               <template #prefix>
                 <MailOutlined class="site-form-item-icon" />
               </template>
