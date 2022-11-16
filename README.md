@@ -1,7 +1,7 @@
 # Expenses Tracker
 This is a demo repository for my talk **Integrate Firebase Auth to your Full Stack Application** in GDG Manila's DevFest 2022. This is a monorepo that will show you how the Firebase Web SDK and Firebase Admin SDK handles most of the authentication workflows for your app
 
-### Tech Stack User
+### Tech Stack Used
 - Vue 3
 - NestJS
 - TypeORM
