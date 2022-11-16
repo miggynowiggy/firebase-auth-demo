@@ -18,6 +18,7 @@ const firebaseAuthSubscriber = ref<Unsubscribe | null>(null)
 onMounted(() => {
   // Subscribe to firebase auth changes when the app is initialized
   const subscriber = onAuthStateChanged(AUTH, async (authUser) => {
+    console.log('user: ', authUser)
     userStore.setAuthUser(authUser)
 
     if (authUser && !authUser?.emailVerified) {

@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { notification } from 'ant-design-vue'
+import Logo from 'src/assets/logo.png'
 import { useUserStore } from 'src/store'
 import { Logout, ChangePassword } from 'src/services'
-
 
 const userStore = useUserStore()
 const logoutLoading = ref(false)
@@ -110,8 +110,22 @@ async function confirmChangePassword() {
           justify="center"
           :style="{ textAlign: 'center' }"
         >
-          <a-col :span="22">
-            <a-img :height="250" :src="userStore.user?.profilePicture" />
+          <a-col :span="22" :style="{ margin: '20px' }">
+            <a-image  
+              v-if="userStore.user?.profilePicture"
+              :width="250"
+              :src="userStore.user?.profilePicture" 
+              :fallback="Logo"
+              alt="profile_picture" 
+              :preview="false" 
+            />
+            <a-image  
+              v-else
+              :width="250"
+              :src="Logo" 
+              alt="profile_picture" 
+              :preview="false" 
+            />
           </a-col>
           <a-col :span="22">
             <a-typography-title>{{

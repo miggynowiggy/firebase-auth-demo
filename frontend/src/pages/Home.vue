@@ -100,6 +100,7 @@ async function addExpense() {
 
   dialogState.value = false
   loading.value = false
+  expense.value = { description: '' , amount: 0, type: 'Bills'  }
   message['success']({ content: 'Expense added!' })
 }
 
