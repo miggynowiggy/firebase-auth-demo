@@ -5,7 +5,7 @@
     "dev": "npm run dev:client && npm run dev:api",
     "dev:client": "cd frontend && npm run dev",
     "dev:api": "cd backend && npm run start:dev",
-    "build:client": "cd frontend && npm run build",
+    "build:client": "cd frontend npm install && && npm run build",
     "deploy:client": "cd frontend && npm run deploy"
   }
 }
