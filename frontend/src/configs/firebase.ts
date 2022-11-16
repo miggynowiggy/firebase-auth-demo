@@ -10,6 +10,7 @@ const firebaseConfig = {
   storageBucket: constants.FIREBASE_STORAGE_BUCKET,
   messagingSenderId: constants.FIREBASE_MESSAGING_SENDER_ID,
   appId: constants.FIREBASE_APP_ID,
+  measurementId: constants.FIREBASE_MEASUREMENT_ID
 }
 
 export const FIREBASE = initializeApp(firebaseConfig)
