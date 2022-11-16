@@ -1,147 +1,99 @@
 <template>
-  <v-container fluid class="h-screen w-100">
-    <v-row align="center" justify="center" class="h-100">
-      <v-col cols="3">
-        <v-card class="px-2 py-4" elevation="12">
-          <v-card-title
-            class="text-h4 font-weight-bold text-center text-primary"
+  <a-row type="flex" align="middle" justify="center" :style="{ height: '100%'}">
+      <a-col :span="6">
+        <a-card title="Login" hoverable>
+          <a-form
+            layout="vertical"
           >
-            Login
-          </v-card-title>
-          <v-container fluid>
-            <v-row align="center" justify="center">
-              <v-col cols="11">
-                <v-form
-                  v-model="loginForm"
-                  ref="loginFormRef"
-                  lazy-validation
-                  @submit.prevent="emailSignIn"
-                >
-                  <v-text-field
-                    v-model="email"
-                    label="Email"
-                    variant="outlined"
-                    type="email"
-                    color="primary"
-                    required
-                    clearable
-                    :readonly="loading"
-                    :rules="[
-                      (v) => !!v || 'Email is required',
-                      (v) => /.+@.+/.test(v) || 'E-mail must be valid',
-                    ]"
-                  />
+            <a-form-item
+              label="Email"
+              name="email"
+            >
+              <a-input v-model:value="email">
+                <template #prefix>
+                  <UserOutlined class="site-form-item-icon" />
+                </template>
+              </a-input>
+            </a-form-item>
 
-                  <v-text-field
-                    v-model="password"
-                    label="Password"
-                    variant="outlined"
-                    color="primary"
-                    class="mt-3"
-                    required
-                    :rules="[
-                      (v) => !!v || 'Password is required',
-                      (v) =>
-                        v.length >= 8 || 'Password should be 8 characters long',
-                    ]"
-                    :type="showPassword ? 'text' : 'password'"
-                    :readonly="loading"
-                    :append-inner-icon="
-                      showPassword
-                        ? 'fa-regular fa-eye'
-                        : 'fa-regular fa-eye-slash'
-                    "
-                    @click:append-inner="showPassword = !showPassword"
-                  >
-                  </v-text-field>
+            <a-form-item
+              label="Password"
+              name="password"
+            >
+              <a-input-password v-model:value="password">
+                <template #prefix>
+                  <LockOutlined class="site-form-item-icon" />
+                </template>
+              </a-input-password>
+            </a-form-item>
 
-                  <br />
+            <a-form-item>
+              <a-button 
+                type="text" 
+                @click="router.push({ name: 'ForgotPassword' })" 
+              >
+                Forgot Password?
+              </a-button>
+            </a-form-item>
 
-                  <v-btn
-                    block
-                    variant="flat"
-                    color="primary"
-                    type="submit"
-                    :disabled="!loginForm"
-                    :loading="loading"
-                  >
-                    Login
-                  </v-btn>
+            <a-form-item>
+              <a-button 
+                :disabled="!email || !password" 
+                type="primary"
+                @click="emailSignIn"
+                :loading="loading"
+                block
+              >
+                Log in
+              </a-button>
+            </a-form-item>
 
-                  <v-btn
-                    variant="outlined"
-                    color="primary"
-                    block
-                    class="mt-6"
-                    :disabled="loading"
-                    @click="router.push({ name: 'Register' })"
-                  >
-                    Register
-                  </v-btn>
+            <a-form-item>
+              <a-button type="default" block :loading="loading" @click="router.push({ name: 'Register' })">
+                Register
+              </a-button>
+            </a-form-item>
+          </a-form>
 
-                  <v-btn
-                    variant="text"
-                    color="black"
-                    class="mt-6"
-                    block
-                    @click="router.push({ name: 'ForgotPassword' })"
-                    :disabled="loading"
-                  >
-                    Forgot Password?
-                  </v-btn>
-                </v-form>
-              </v-col>
-              <v-col cols="12" class="my-2">
-                <v-divider />
-              </v-col>
-              <v-col cols="11">
-                <v-btn
-                  block
-                  variant="outlined"
-                  color="black"
-                  append-icon="fa-brands fa-google"
-                  :loading="loading"
-                  @click="googleSignIn"
-                >
+          <template #actions>
+            <a-row type="flex" align="center" justify="around">
+              <a-col :span="21" :style="{ marginTop: '20px', marginBottom: '20px'}">
+                <a-button type="primary" block :loading="loading" @click="googleSignIn">
                   Login with Google
-                </v-btn>
-              </v-col>
-            </v-row>
-          </v-container>
-        </v-card>
-      </v-col>
-    </v-row>
-  </v-container>
+                  <template #icon>
+                    <GoogleOutlined/>
+                  </template>
+                </a-button>
+              </a-col>
+            </a-row>
+          </template>
+        </a-card>
+      </a-col>
+    </a-row>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useNotify } from '@/store/notify'
-import { LoginByEmailPassword, LoginByGoogle } from '@/services/auth'
+import { notification } from 'ant-design-vue'
+import { UserOutlined, LockOutlined, GoogleOutlined } from '@ant-design/icons-vue'
+import { LoginByEmailPassword, LoginByGoogle, LoginByDiscord } from '../services'
+import { useUserStore } from '../store/user'
+
+interface ILoginForm {
+  email: string
+  password: string
+}
 
 const router = useRouter()
-const notify = useNotify()
+const userStore = useUserStore()
 
-const email = ref('')
-const password = ref('')
-const showPassword = ref(false)
-const loginForm = ref(false)
-const loginFormRef = ref(null)
+const email = ref("")
+const password = ref("")
 const loading = ref(false)
 
 async function emailSignIn() {
-  const isValid = loginFormRef?.value?.validate()
   loading.value = true
-
-  if (!isValid) {
-    notify.show({
-      text: 'Double check your credentials',
-      type: 'error',
-    })
-    loading.value = false
-    return
-  }
 
   try {
     await LoginByEmailPassword(email.value, password.value)
@@ -150,16 +102,17 @@ async function emailSignIn() {
 
     switch (err?.code) {
       case 'auth/user-not-found':
+      case 'auth/wrong-password':
         message = 'Invalid Email / Password'
         break
+      
       default:
         message = 'Something went wrong'
     }
 
-    notify.show({
-      title: 'Error',
-      text: message,
-      type: 'error',
+    notification['error']({
+      message: 'Error!',
+      description: message
     })
   }
 
@@ -182,10 +135,33 @@ async function googleSignIn() {
         message = 'Something went wrong'
     }
 
-    notify.show({
-      title: 'Error',
-      text: message,
-      type: 'error',
+    notification['error']({
+      message: 'Error!',
+      description: message
+    })
+  }
+  loading.value = false
+}
+
+async function discordSignIn() {
+  loading.value = true
+
+  try {
+    await LoginByDiscord()
+  } catch (err) {
+    let message = ''
+
+    switch (err?.code) {
+      case 'auth/popup-closed-by-user':
+        message = 'Google Sign In cancelled'
+        break
+      default:
+        message = 'Something went wrong'
+    }
+
+    notification['error']({
+      message: 'Error!',
+      description: message
     })
   }
   loading.value = false

@@ -1,16 +1,337 @@
+<script setup lang="ts">
+import { ref, defineComponent, reactive, computed, onMounted, watch } from 'vue'
+import type { Ref, UnwrapRef } from 'vue'
+import { PlusCircleOutlined, EditOutlined, CheckOutlined } from '@ant-design/icons-vue'
+import { message, notification } from 'ant-design-vue'
+import cloneDeep from 'lodash/cloneDeep'
+import dayjs from 'dayjs'
+import type { Dayjs } from 'dayjs'
+import { IExpense, ICreateExpense, ExpenseTypes, TExpenseType } from '@/models'
+import { CreateExpense } from '@/services'
+import { DeleteExpense, GetExpenses, UpdateExpense } from '@/services'
+
+type TCustomExpense = {
+  description: string,
+  type: TExpenseType,
+  amount: number,
+  date: Dayjs
+}
+const DATE_FORMAT = 'YYYY-MM-DD'
+
+const expensesTableRef = ref(null)
+const loading = ref(false)
+const dialogState = ref(false)
+const expenseDate = ref<Dayjs>()
+const expense = ref<ICreateExpense>({
+  description: '',
+  amount: 0.0,
+  type: 'Bills'
+})
+const expenses = ref<IExpense[]>([])
+const expensesHeader = ref([
+  { title: 'Date', dataIndex: 'date', key: 'date' },
+  { title: 'Description', dataIndex: 'description', key: 'description' },
+  { title: 'Type', dataIndex: 'type', key: 'type' },
+  { title: 'Amount', dataIndex: 'amount', key: 'amount' },
+  { title: '', dataIndex: 'operations' }
+])
+const editableData: UnwrapRef<Record<string, TCustomExpense>> = reactive({})
+
+const validForm = computed(() => !expense.value.amount && !expense.value.description && !expense.value.type)
+const totalExpenses = computed(() => expenses.value.reduce((sum, ex) => sum += ex.amount, 0))
+
+// Get all User's Expenses on page mount
+onMounted(async () => {
+  loading.value = true
+  const externalExpenses = await GetExpenses()
+  if (externalExpenses && externalExpenses.length) {
+    expenses.value = externalExpenses.map((ex) => {
+      const formattedDate = dayjs(ex.date).format(DATE_FORMAT);
+      return {
+        ...ex,
+        date: formattedDate
+      }
+    })
+  }
+  loading.value = false
+})
+
+async function addExpense() {
+  loading.value = true
+  expense.value.amount = Number(expense.value.amount)
+
+  if (expenseDate.value) {
+    expense.value.date = expenseDate.value.toISOString();
+  }
+  
+  const newExpense = await CreateExpense(expense.value)
+
+  if (!newExpense) {
+    notification['error']({
+      message: 'Error!',
+      description: 'Something went wrong while adding expense'
+    })
+    loading.value = false
+    return
+  }
+
+  expenses.value.push({
+    ...newExpense,
+    date: dayjs(newExpense.date as string).format(DATE_FORMAT)
+  } as IExpense)
+
+  dialogState.value = false
+  loading.value = false
+  message['success']({ content: 'Expense added!' })
+}
+
+const edit = (id: number) => {
+  const row = cloneDeep(expenses.value.filter(item => id === item.id)[0])
+  editableData[id] = cloneDeep({ ...row, date: dayjs(row.date) })
+}
+
+const save = async (id: number) => {
+  const updatedRow = Object.assign(
+    expenses.value.filter(item => id === item.id)[0], 
+    editableData[id], 
+    { date: editableData[id].date.toISOString() }
+  )
+  
+  const updatedExpense = await UpdateExpense({
+    id: updatedRow.id,
+    description: updatedRow.description,
+    type: updatedRow.type,
+    date: updatedRow.date,
+    amount: updatedRow.amount
+  })
+
+  if (!updatedExpense) {
+    message['error']({ content: 'Expense not updated!' })
+    delete editableData[id]
+  }
+
+  const index = expenses.value.findIndex(e => e.id === updatedExpense?.id);
+  if (index >= 0) {
+    expenses.value.splice(index, 1, {
+      ...updatedExpense,
+      date: dayjs(updatedExpense?.date as string).format(DATE_FORMAT)
+    } as IExpense)
+  }
+
+  message['success']({ content: 'Expense updated!' })
+  delete editableData[id]
+}
+
+const onDelete = async (id: number) => {
+  loading.value = true;
+  
+  const isDeleted = await DeleteExpense(id);
+  if (!isDeleted) {
+    message['error']({ content: 'Expense not deleted!' })
+    return
+  }
+
+  message['success']({ content: 'Expenses deleted!' })
+  loading.value = false;
+  expenses.value = expenses.value.filter(item => item.id !== id)
+}
+
+</script>
+
 <template>
-  <v-container>
-    <v-row align="center" justify="center">
-      <v-col cols="10">
-        <div class="text-h2 font-weight-bold primary-text text-center my-6">
-          HOME PAGE BRUH
-        </div>
-        <v-btn block color="success" @click="Logout"> LOG OUT MUNA PRE </v-btn>
-      </v-col>
-    </v-row>
-  </v-container>
+  <div>
+    <!-- Expense Table -->
+    <a-row type="flex" align="middle" justify="center" :style="{ height: '100%' }">
+      <a-col :span="4" :style="{ margin: '20px'}">
+        <a-card>
+          <a-statistic :title="`Total Expenses as of ${dayjs().format('MMM DD, YYYY')}`" :value="totalExpenses" />
+        </a-card>
+      </a-col>
+      <a-col :span="22" :style="{ margin: '20px' }">
+        <a-table 
+          :dataSource="expenses" 
+          :columns="expensesHeader"
+          :loading="loading"
+        >
+          <template #bodyCell="{ column, text, record }">
+            <template v-if="column.dataIndex === 'date'">
+              <div class="editable-cell">
+                <div v-if="editableData[record.id]">
+                  <a-date-picker
+                    v-model:value="editableData[record.id].date"
+                    @keypress.enter="save(record.id)"
+                    :style="{ width: '100%' }"
+                  >
+                    <template #addonAfter>
+                      <CheckOutlined class="editable-cell-icon-check" @click="save(record.id)" />
+                    </template>
+                  </a-date-picker>
+                </div>
+                <div v-else class="editable-cell-text-wrapper">
+                  {{ text || ' '}}
+                </div>
+              </div>
+            </template>
+
+            <template v-else-if="column.dataIndex === 'description'">
+              <div class="editable-cell">
+                <div v-if="editableData[record.id]">
+                  <a-input
+                    v-model:value="editableData[record.id].description"
+                    @keypress.enter="save(record.id)"
+                    @blur="save(record.id)"
+                  >
+                    <template #addonAfter>
+                      <CheckOutlined class="editable-cell-icon-check" @click="save(record.id)" />
+                    </template>
+                  </a-input>
+                </div>
+                <div v-else class="editable-cell-text-wrapper">
+                  {{ text || ' '}}
+                </div>
+              </div>
+            </template>
+
+            <template v-else-if="column.dataIndex === 'type'">
+              <div class="editable-cell">
+                <div v-if="editableData[record.id]">
+                  <a-select
+                    v-model:value="editableData[record.id].type"
+                    :options="ExpenseTypes.map(e => ({ label: e, value: e }))"
+                    @keypress.enter="save(record.id)"
+                    @select="save(record.id)"
+                    :style="{ width: '100%' }"
+                  >
+                    <template #addonAdter>
+                      <CheckOutlined class="editable-cell-icon-check" @click="save(record.id)" />
+                    </template>
+                  </a-select>
+                </div>
+                <div v-else class="editable-cell-text-wrapper">
+                  {{ text || ' '}}
+                </div>
+              </div>
+            </template>
+
+            <template v-else-if="column.dataIndex === 'amount'">
+              <div class="editable-cell">
+                <div v-if="editableData[record.id]">
+                  <a-input-number
+                    v-model:value="editableData[record.id].amount"
+                    :min="0"
+                    @keypress.enter="save(record.id)"
+                  >
+                    <template #addonAfter>
+                      <CheckOutlined class="editable-cell-icon-check" @click="save(record.id)" />
+                    </template>
+                  </a-input-number>
+                </div>
+                <div v-else class="editable-cell-text-wrapper">
+                  {{ text || ' '}}
+                </div>
+              </div>
+            </template>
+
+            <template v-else-if="column.dataIndex === 'operations'">
+              <a-popconfirm
+                v-if="expenses.length"
+                title="Are you sure to delete?"
+                @confirm="onDelete(record.id)"
+              >
+                <a-button size="small" type="text" danger>Delete</a-button>
+              </a-popconfirm>
+
+              <a-button 
+                size="small" 
+                @click="edit(record.id)" 
+                :style="{ marginLeft: '10px' }"
+                v-if="!editableData[record.id] || !Object.keys(editableData[record.id]).length"
+              >
+                Edit
+              </a-button>
+
+              <a-button 
+                size="small" 
+                @click="delete editableData[record.id]" 
+                :style="{ marginLeft: '10px' }"
+                v-else
+              >
+                Cancel
+              </a-button>
+
+              <a-button 
+                size="small" 
+                type="primary"
+                @click="save(record.id)" 
+                :style="{ marginLeft: '10px' }"
+                v-show="editableData && editableData[record.id] && Object.keys(editableData[record.id]).length"
+              >
+                Save
+              </a-button>
+            </template>
+          </template>
+        </a-table>
+      </a-col>
+    </a-row>
+
+    <!-- Add Expense Dialog -->
+    <a-modal
+      v-model:visible="dialogState"
+      title="Add Expense"
+      :ok-button-props="{ 
+        disabled: validForm,
+        loading
+      }"
+      :cancel-button-props="{
+        disabled: loading
+      }"
+      @ok="addExpense"
+    >
+      <a-form layout="vertical">
+        <a-form-item label="Description" name="description">
+          <a-textarea 
+            v-model:value="expense.description"
+            placeholder="describe your expense..."
+            auto-size
+          />
+        </a-form-item>
+
+        <a-form-item label="Date" name="date">
+          <a-date-picker
+            v-model:value="expenseDate"
+            allowClear
+            :style="{ width: '100%'}"
+          />
+        </a-form-item>
+
+        <a-form-item label="Expense Type" name="expenseType">
+          <a-select
+            v-model:value="expense.type"
+            :options="ExpenseTypes.map(e => ({ label: e, value: e}))"
+            placeholder=""
+          />
+        </a-form-item>
+
+        <a-form-item label="Amount" name="expenseAmount">
+          <a-input-number
+            v-model:value="expense.amount"
+            :min="0"
+            :style="{ width: '100%' }"
+          />
+        </a-form-item>
+      </a-form>
+    </a-modal>
+    <a-button 
+      type="primary"
+      size="large"
+      shape="circle"
+      :style="{ position: 'fixed', top: '92%', right: '2%' }"
+      @click="dialogState = true"
+    >
+      <template #icon>
+        <PlusCircleOutlined/>
+      </template>
+    </a-button>
+  </div>
 </template>
 
-<script setup lang="ts">
-import { Logout } from '@/services/auth'
-</script>

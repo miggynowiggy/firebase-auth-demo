@@ -1,17 +1,13 @@
 import { defineStore } from 'pinia'
 import { User as FirebaseUser } from 'firebase/auth'
-
-export interface IUser {
-  fullName: string
-  email: string
-}
+import { IUser } from '@/models'
 
 interface UserStore {
   user: IUser | null
   authUser: FirebaseUser | null
 }
 
-export const useUser = defineStore('user', {
+export const useUserStore = defineStore('userStore', {
   state: (): UserStore => ({
     user: null,
     authUser: null,

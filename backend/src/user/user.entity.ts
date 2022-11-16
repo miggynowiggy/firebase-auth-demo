@@ -1,4 +1,4 @@
-import { Task } from 'src/tasks/task.entity';
+import { Expense } from 'src/expenses/expense.entity';
 import {
   Column,
   CreateDateColumn,
@@ -21,6 +21,9 @@ export class User {
   @Column({ type: 'varchar', length: 120 })
   public fullName!: string;
 
+  @Column({ type: 'text', nullable: true })
+  public profilePicture: string;
+
   @CreateDateColumn({ type: 'timestamp' })
   public createdAt!: Date;
 
@@ -28,6 +31,6 @@ export class User {
   public updatedAt!: Date;
 
   // Relationships
-  @OneToMany(() => Task, (task) => task.User)
-  public Tasks: Task[];
+  @OneToMany(() => Expense, (expense) => expense.User)
+  public Expenses: Expense[];
 }

@@ -1,12 +1,16 @@
 export interface IUser {
-  fullName: string
-  email: string
-  uid: string
   id: number
+  uid: string
+  email: string
+  fullName: string
+  profilePicture?: string
+  createdAt?: Date
+  updatedAt?: Date
 }
 
 export interface ICreateUser {
-  fullName: string
-  email: string
   uid: string
+  email: string
+  fullName: string
+  profilePicture?: string
 }

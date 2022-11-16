@@ -5,14 +5,14 @@
 <script setup lang="ts">
 import { onMounted, onBeforeUnmount, ref } from 'vue'
 import { onAuthStateChanged, Unsubscribe } from 'firebase/auth'
+import { notification } from 'ant-design-vue'
 import { AUTH } from './configs/firebase'
-import { useUser } from './store/user'
+import { useUserStore } from './store/user'
 import { useRouter } from 'vue-router'
-import { useNotify } from './store/notify'
+import { CheckUserByEmail, CreateUser } from './services'
 
-const userStore = useUser()
+const userStore = useUserStore()
 const router = useRouter()
-const notify = useNotify()
 const firebaseAuthSubscriber = ref<Unsubscribe | null>(null)
 
 onMounted(() => {
@@ -23,15 +23,28 @@ onMounted(() => {
     if (authUser && !authUser?.emailVerified) {
       console.log('email not verified')
       router.push({ name: 'Login' })
-      notify.show({
-        title: 'Error',
-        text: 'Please verify your email first before logging-in',
-        type: 'error',
+      notification['error']({
+        message: 'Email not verified!',
+        description: 'Please confirm your email first before logging in'
       })
       return
     }
 
     if (authUser) {
+      // Check if user is saved at the backend
+      let user = await CheckUserByEmail(authUser.email as string);
+
+      // If the firebase user was not yet created at the backend, then create it
+      if (!user) {
+        user = await CreateUser({
+          uid: authUser?.uid as string,
+          email: authUser?.email as string,
+          fullName: authUser?.displayName ?? "",
+          profilePicture: authUser?.photoURL ?? "",
+        })
+      }
+
+      userStore.setUser(user)
       router.push({ name: 'Home' })
       return
     }

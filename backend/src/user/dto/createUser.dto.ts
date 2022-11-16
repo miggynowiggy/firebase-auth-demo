@@ -1,4 +1,10 @@
-import { IsAlpha, IsAlphanumeric, IsEmail, IsNotEmpty } from 'class-validator';
+import {
+  IsAlphanumeric,
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateUserForm {
   @IsEmail()
@@ -10,6 +16,10 @@ export class CreateUserForm {
   uid: string;
 
   @IsNotEmpty()
-  @IsAlpha()
+  @IsString()
   fullName: string;
+
+  @IsOptional()
+  @IsString()
+  profilePicture: string;
 }

@@ -20,24 +20,42 @@ export class UserService {
   public async createUser(body: CreateUserForm) {
     const { fullName, uid, email } = body;
 
-    const isUserExisting = await this.Users.count({
-      where: {
-        email,
-      },
-    });
+    try {
+      const isUserExisting = await this.Users.count({
+        where: {
+          email,
+        },
+      });
 
-    if (isUserExisting) {
-      throw new HttpException(
-        'User is already existing',
-        HttpStatus.BAD_REQUEST,
-      );
+      if (isUserExisting) {
+        throw new HttpException(
+          'User is already existing',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const newUser: User = new User();
+      newUser.fullName = fullName;
+      newUser.uid = uid;
+      newUser.email = email;
+
+      if (body.profilePicture) {
+        newUser.profilePicture = body.profilePicture;
+      }
+
+      return this.Users.save(newUser);
+    } catch (err) {
+      console.log('ERR WHILE CREATING USER: ', err);
+      throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+  }
 
-    const newUser: User = new User();
-    newUser.fullName = fullName;
-    newUser.uid = uid;
-    newUser.email = email;
-
-    return this.Users.save(newUser);
+  public async deleteUser(id: number) {
+    try {
+      await this.Users.delete({ id });
+    } catch (err) {
+      console.log('ERR DELETING A USER: ', err);
+      throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }

@@ -8,6 +8,9 @@ import {
   User,
   UserCredential,
   signOut,
+  reauthenticateWithCredential,
+  updatePassword,
+  OAuthProvider
 } from 'firebase/auth'
 import { AUTH } from '@/configs/firebase'
 
@@ -38,10 +41,27 @@ export async function LoginByGoogle() {
   }
 }
 
+export async function LoginByDiscord() {
+  try {
+    const provider = new OAuthProvider('oidc.discord')
+    const results = await signInWithPopup(AUTH, provider);
+
+    const credentials = OAuthProvider.credentialFromResult(results);
+    const accessToken = credentials?.accessToken;
+    const idToken = credentials?.idToken;
+
+    return { idToken, accessToken }
+  } catch (err) {
+    console.log('ERR WHILE LOGGING IN WITH DISCORD: ', err)
+    throw err
+  }
+}
+
 export async function RegisterByEmailPassword(email: string, password: string) {
   try {
-    const user = await createUserWithEmailAndPassword(AUTH, email, password)
-    return user
+    const userCredential = await createUserWithEmailAndPassword(AUTH, email, password)
+    await sendEmailVerification(userCredential.user);
+    return userCredential.user
   } catch (err) {
     console.log('ERR IN REGISTERING USER TO FIREBASE: ', err)
     throw err
@@ -65,6 +85,18 @@ export async function SendForgotPassword(email: string) {
     throw err
   }
 }
+
+export async function ChangePassword(oldPassword: string, newPassword: string) {
+  try {
+    const email = AUTH.currentUser?.email as string
+    await signInWithEmailAndPassword(AUTH, email, oldPassword)
+
+    await updatePassword(AUTH.currentUser as User, newPassword);
+  } catch (err) {
+    console.log('ERR WHILE CHANGING PASSWORD: ', err)
+    throw err
+  }
+} 
 
 export async function Logout() {
   try {

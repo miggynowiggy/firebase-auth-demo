@@ -1,9 +1,9 @@
 // Composables
 import { createApp } from 'vue'
+import Antd from 'ant-design-vue'
+import 'ant-design-vue/dist/antd.css';
 
 // Plugins
-import { registerPlugins } from '@/plugins'
-import vuetify from './plugins/vuetify'
 import router from './routes'
 import store from './store'
 
@@ -12,6 +12,8 @@ import App from './App.vue'
 
 const app = createApp(App)
 
-registerPlugins(app)
-
-app.use(router).use(store).use(vuetify).mount('#app')
+app
+  .use(router)
+  .use(store)
+  .use(Antd)
+  .mount('#app')

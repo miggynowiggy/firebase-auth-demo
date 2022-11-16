@@ -5,29 +5,25 @@ import {
   NestMiddleware,
 } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
-import Firebase from '../configs/firebase';
+import Firebase from 'src/configs/firebase';
 
 @Injectable()
 export class ValidateTokenMiddleware implements NestMiddleware {
   async use(req: Request, res: Response, next: NextFunction) {
     const bearerToken = req.headers['authorization'];
 
-    if (!bearerToken) {
+    if (!bearerToken)
       throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
-    }
 
     const token = bearerToken.replace('Bearer ', '');
 
-    if (!token) {
-      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
-    }
+    if (!token) throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
 
     try {
       const decodedUser = await Firebase.auth().verifyIdToken(token);
 
-      if (!decodedUser) {
+      if (!decodedUser)
         throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
-      }
 
       req.firebaseUser = decodedUser;
       next();

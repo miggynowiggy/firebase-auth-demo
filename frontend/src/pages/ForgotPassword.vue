@@ -1,104 +1,57 @@
 <template>
-  <v-container fluid class="h-screen w-100">
-    <v-row align="center" justify="center" class="h-100">
-      <v-col cols="3">
-        <v-card class="px-2 py-4" elevation="12">
-          <v-card-title
-            v-if="!sendSuccess"
-            class="text-h4 font-weight-bold text-center text-primary"
+  <a-row type="flex" align="middle" justify="center" :style="{ height: '100%'}">
+    <a-col :span="12" v-if="sendSuccess">
+      <div v-if="sendSuccess" :style="{ textAlign: 'center' }">
+        <a-typography-title >
+          Success!
+        </a-typography-title>
+        <a-typography>
+          An email has been sent to you to reset your password
+        </a-typography>
+        <a-button type="dashed" :style="{ marginTop: '30px'}" @click="router.push({ name: 'Login' })">
+          Back to Login
+        </a-button>
+      </div>
+    </a-col>
+    <a-col :span="6" v-else>
+      <a-card title="Forgot Password">
+        <a-form layout="vertical">
+          <a-form-item
+            label="Email"
+            name="email"
           >
-            Forgot Password
-          </v-card-title>
-          <v-card-title
-            v-else
-            class="text-h4 text-success text-center font-weight-bold"
-          >
-            Success!
-          </v-card-title>
-          <v-container fluid v-if="!sendSuccess">
-            <v-row align="center" justify="center">
-              <v-col cols="11">
-                <v-form
-                  v-model="forgotForm"
-                  ref="forgotFormRef"
-                  lazy-validation
-                  @submit.prevent="processForgotPassword"
-                >
-                  <v-text-field
-                    v-model="email"
-                    label="Email"
-                    placeholder="Enter the email used for your account"
-                    variant="outlined"
-                    type="email"
-                    color="primary"
-                    required
-                    clearable
-                    :readonly="loading"
-                    :rules="[
-                      (v) => !!v || 'Email is required',
-                      (v) => /.+@.+/.test(v) || 'E-mail must be valid',
-                    ]"
-                  />
+            <a-input v-model:value="email">
+              <template #prefix>
+                <UserOutlined class="site-form-item-icon" />
+              </template>
+            </a-input>
+          </a-form-item>
 
-                  <br />
-
-                  <v-btn
-                    block
-                    variant="flat"
-                    color="primary"
-                    type="submit"
-                    :disabled="!forgotForm"
-                    :loading="loading"
-                  >
-                    Send Password Reset Link
-                  </v-btn>
-
-                  <v-btn
-                    variant="text"
-                    color="black"
-                    block
-                    class="mt-4"
-                    @click="router.push({ name: 'Login' })"
-                  >
-                    Back to Login
-                  </v-btn>
-                </v-form>
-              </v-col>
-            </v-row>
-          </v-container>
-          <v-container fluid v-else>
-            <v-row>
-              <v-col cols="12">
-                <div class="text-subtitle-2 text-center mt-6">
-                  Please proceed with the instructions sent out to your email
-                </div>
-              </v-col>
-              <v-col>
-                <v-btn
-                  block
-                  color="primary"
-                  variant="outlined"
-                  @click="router.push({ name: 'Login' })"
-                >
-                  Back to Login
-                </v-btn>
-              </v-col>
-            </v-row>
-          </v-container>
-        </v-card>
-      </v-col>
-    </v-row>
-  </v-container>
+          <a-form-item>
+            <a-button 
+              :disabled="!email" 
+              type="primary"
+              block
+              :loading="loading"
+              @click="processForgotPassword"
+            >
+              Send Password Reset Link
+            </a-button>
+          </a-form-item>
+        </a-form>
+      </a-card>
+    </a-col>
+  </a-row>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useNotify } from '@/store/notify'
-import { SendForgotPassword } from '@/services/auth'
+import { UserOutlined } from '@ant-design/icons-vue'
+import { notification } from 'ant-design-vue'
+import { SendForgotPassword } from '@/services'
 
 const router = useRouter()
-const notify = useNotify()
 
 const email = ref('')
 const forgotForm = ref(false)
@@ -107,26 +60,15 @@ const loading = ref(false)
 const sendSuccess = ref(false)
 
 async function processForgotPassword() {
-  const isValid = forgotFormRef?.value?.validate()
   loading.value = true
-
-  if (!isValid) {
-    notify.show({
-      text: 'Double check your details',
-      type: 'error',
-    })
-    loading.value = false
-    return
-  }
 
   try {
     await SendForgotPassword(email.value)
     sendSuccess.value = true
   } catch (err) {
-    notify.show({
-      title: 'Error',
-      text: err?.message || 'Something went wrong',
-      type: 'error',
+    notification['error']({
+      message: 'Error!',
+      description: "Something went wrong while sending your password reset email",
     })
   }
 

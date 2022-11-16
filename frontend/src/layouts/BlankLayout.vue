@@ -1,12 +1,10 @@
 <template>
-  <v-app>
-    <v-main>
-      <Notify />
+  <a-layout>
+    <a-layout-content :style="{ height: '100vh', width:  '100%' }">
       <router-view />
-    </v-main>
-  </v-app>
+    </a-layout-content>
+  </a-layout>
 </template>
 
 <script setup lang="ts">
-import Notify from '@/components/Notify.vue'
 </script>

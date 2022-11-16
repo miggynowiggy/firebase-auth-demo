@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
 import routes from './routes'
-import { useUser } from '@/store/user'
+import { useUserStore } from '@/store/user'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -9,7 +9,7 @@ const router = createRouter({
 })
 
 router.beforeEach((nextPage, prevPage) => {
-  const user = useUser()
+  const user = useUserStore()
 
   // If the user is not yet logged in, redirect them to the Login page
   if (nextPage.meta?.isPrivateRoute && !user.isLoggedIn) {

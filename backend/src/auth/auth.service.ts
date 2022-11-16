@@ -11,8 +11,25 @@ import { Repository } from 'typeorm';
 
 @Injectable()
 export class AuthService {
-  @InjectRepository(User)
-  private readonly Users: Repository<User>;
+  constructor(
+    @InjectRepository(User)
+    private readonly Users: Repository<User>,
+  ) {}
+
+  async getUserByEmail(email: string) {
+    try {
+      const user = this.Users.findOne({
+        where: {
+          email,
+        },
+      });
+
+      return user;
+    } catch (err) {
+      console.log('ERR WHILE GETTING USER BY EMAIL: ', err);
+      throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
 
   async sendForgotPasswordEmail(body: ForgotPasswordForm) {
     try {
