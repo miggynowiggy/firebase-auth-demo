@@ -118,6 +118,7 @@ async function confirmChangePassword() {
               :fallback="Logo"
               alt="profile_picture" 
               :preview="false" 
+              :style="{ borderRadius: '999px' }"
             />
             <a-image  
               v-else
@@ -125,6 +126,7 @@ async function confirmChangePassword() {
               :src="Logo" 
               alt="profile_picture" 
               :preview="false" 
+              :style="{ borderRadius: '999px' }"
             />
           </a-col>
           <a-col :span="22">
