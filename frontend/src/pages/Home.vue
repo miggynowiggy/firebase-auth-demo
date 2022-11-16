@@ -10,6 +10,8 @@ import { message, notification } from 'ant-design-vue'
 import cloneDeep from 'lodash/cloneDeep'
 import dayjs from 'dayjs'
 import type { Dayjs } from 'dayjs'
+import { logEvent } from 'firebase/analytics'
+import { ANALYTICS } from 'src/configs/firebase'
 import {
   IExpense,
   ICreateExpense,
@@ -102,6 +104,7 @@ async function addExpense() {
   loading.value = false
   expense.value = { description: '' , amount: 0, type: 'Bills'  }
   message['success']({ content: 'Expense added!' })
+  logEvent(ANALYTICS, 'add_expense')
 }
 
 const edit = (id: number) => {
@@ -139,6 +142,7 @@ const save = async (id: number) => {
 
   message['success']({ content: 'Expense updated!' })
   delete editableData[id]
+  logEvent(ANALYTICS, 'update_expense')
 }
 
 const onDelete = async (id: number) => {
@@ -153,6 +157,7 @@ const onDelete = async (id: number) => {
   message['success']({ content: 'Expenses deleted!' })
   loading.value = false
   expenses.value = expenses.value.filter((item) => item.id !== id)
+  logEvent(ANALYTICS, 'delete_expense')
 }
 </script>
 

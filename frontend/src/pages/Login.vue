@@ -7,6 +7,8 @@ import {
   LockOutlined,
   GoogleOutlined,
 } from '@ant-design/icons-vue'
+import { logEvent } from 'firebase/analytics'
+import { ANALYTICS } from 'src/configs/firebase'
 import { LoginByEmailPassword, LoginByGoogle } from 'src/services'
 import { useUserStore } from 'src/store/user'
 
@@ -27,6 +29,7 @@ async function emailSignIn() {
 
   try {
     await LoginByEmailPassword(email.value, password.value)
+    logEvent(ANALYTICS, 'email_login')
   } catch (err: any) {
     let message = ''
 
@@ -56,6 +59,7 @@ async function googleSignIn() {
 
   try {
     await LoginByGoogle()
+    logEvent(ANALYTICS, 'google_login')
   } catch (err: any) {
     let message = ''
 

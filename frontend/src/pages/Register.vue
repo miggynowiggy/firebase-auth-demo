@@ -4,6 +4,8 @@ import { useRouter } from 'vue-router'
 import { UserOutlined, MailOutlined, LockOutlined } from '@ant-design/icons-vue'
 import { notification } from 'ant-design-vue'
 import { AuthError } from '@firebase/auth'
+import { logEvent } from '@firebase/analytics'
+import { ANALYTICS } from 'src/configs/firebase'
 import { useUserStore } from 'src/store/user'
 import { RegisterByEmailPassword, CreateUser } from 'src/services'
 
@@ -34,6 +36,8 @@ async function register() {
       uid: authUser?.uid ?? '',
       fullName: newUser.value.fullName ?? '',
     })
+    
+    logEvent(ANALYTICS, 'sign_up')
 
     notification['success']({
       message: 'Check your Email!',

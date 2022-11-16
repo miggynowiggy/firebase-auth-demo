@@ -3,6 +3,8 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { UserOutlined } from '@ant-design/icons-vue'
 import { notification } from 'ant-design-vue'
+import { logEvent } from '@firebase/analytics'
+import { ANALYTICS } from 'src/configs/firebase'
 import { SendForgotPassword } from 'src/services'
 
 const router = useRouter()
@@ -19,6 +21,7 @@ async function processForgotPassword() {
   try {
     await SendForgotPassword(email.value)
     sendSuccess.value = true
+    logEvent(ANALYTICS, 'send_forgot_password')
   } catch (err: any) {
     notification['error']({
       message: 'Error!',
