@@ -1,0 +1,10 @@
+{
+  "name": "firebase-auth-demo",
+  "private": true,
+  "scripts": {
+    "dev": "npm run dev:client && npm run dev:api",
+    "dev:client": "cd frontend && npm run dev",
+    "dev:api": "cd backend && npm run start:dev",
+    "deploy:client": "cd frontend && npm run deploy"
+  }
+}
