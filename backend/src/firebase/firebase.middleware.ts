@@ -33,11 +33,6 @@ export class FirebaseMiddleware implements NestMiddleware {
 
     try {
       const decodedUser = await this.firebase.auth.verifyIdToken(token);
-
-      if (!decodedUser) {
-        throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
-      }
-
       req.firebaseUser = decodedUser;
       next();
     } catch (err) {

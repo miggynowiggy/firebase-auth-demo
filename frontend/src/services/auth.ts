@@ -8,13 +8,10 @@ import {
   User,
   UserCredential,
   signOut,
-  reauthenticateWithCredential,
   updatePassword,
-  OAuthProvider,
 } from 'firebase/auth'
 import { AUTH } from 'src/configs/firebase'
 
-const GoogleProvider = new GoogleAuthProvider()
 
 export async function LoginByEmailPassword(email: string, password: string) {
   try {
@@ -28,6 +25,7 @@ export async function LoginByEmailPassword(email: string, password: string) {
 
 export async function LoginByGoogle() {
   try {
+    const GoogleProvider = new GoogleAuthProvider()
     const result = await signInWithPopup(AUTH, GoogleProvider)
     const credentials = GoogleAuthProvider.credentialFromResult(result)
 
@@ -37,22 +35,6 @@ export async function LoginByGoogle() {
     }
   } catch (err) {
     console.log('ERR WHILE LOGGING IN THROUGH GOOGLE: ', err)
-    throw err
-  }
-}
-
-export async function LoginByDiscord() {
-  try {
-    const provider = new OAuthProvider('oidc.discord')
-    const results = await signInWithPopup(AUTH, provider)
-
-    const credentials = OAuthProvider.credentialFromResult(results)
-    const accessToken = credentials?.accessToken
-    const idToken = credentials?.idToken
-
-    return { idToken, accessToken }
-  } catch (err) {
-    console.log('ERR WHILE LOGGING IN WITH DISCORD: ', err)
     throw err
   }
 }

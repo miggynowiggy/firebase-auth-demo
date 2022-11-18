@@ -18,11 +18,9 @@ const firebaseAuthSubscriber = ref<Unsubscribe | null>(null)
 onMounted(() => {
   // Subscribe to firebase auth changes when the app is initialized
   const subscriber = onAuthStateChanged(AUTH, async (authUser) => {
-    console.log('user: ', authUser)
     userStore.setAuthUser(authUser)
 
     if (authUser && !authUser?.emailVerified) {
-      console.log('email not verified')
       router.push({ name: 'Login' })
       notification['error']({
         message: 'Email not verified!',
